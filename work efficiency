@@ -1,0 +1,36 @@
+WITH employee_hours AS (
+    
+    SELECT e.id AS employee_id,
+           e.first_name,
+           e.last_name,
+           SUM(t.hours_worked) AS total_hours,
+           AVG(t.hours_worked) AS avg_hours_per_project
+    FROM employees e
+    JOIN time_tracking t ON e.id = t.employee_id
+    GROUP BY e.id, e.first_name, e.last_name
+),
+ company_avg_salary AS (
+    
+    SELECT AVG(salary) AS avg_salary
+    FROM employees
+),
+employee_salary_diff AS (
+    
+    SELECT e.id AS employee_id,
+           e.salary,
+           e.salary - (SELECT avg_salary FROM company_avg_salary) AS salary_diff,
+           ((e.salary / (SELECT avg_salary FROM company_avg_salary)) - 1) * 100 AS salary_percentage_diff
+    FROM employees e
+)
+
+SELECT eh.first_name,
+       eh.last_name,
+       eh.total_hours,
+       ROUND(eh.avg_hours_per_project,2),
+       esd.salary,
+       ROUND(esd.salary_diff,2),
+       ROUND(esd.salary_percentage_diff,2)
+FROM employee_hours eh
+JOIN employee_salary_diff esd ON eh.employee_id = esd.employee_id
+ORDER BY eh.total_hours DESC
+LIMIT 3;
