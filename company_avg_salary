@@ -1,0 +1,6 @@
+WITH company_avg_salary AS (
+    
+    SELECT ROUND(AVG(salary),2) AS avg_salary
+    FROM employees
+)
+SELECT*FROM company_avg_salary;
